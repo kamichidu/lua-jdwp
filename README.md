@@ -100,7 +100,7 @@ Supported features
     * [x] Suspend
     * [x] Resume
     * [x] Status
-    * [ ] ThreadGroup
+    * [x] ThreadGroup
     * [ ] Frames
     * [ ] FrameCount
     * [ ] OwnedMonitors
