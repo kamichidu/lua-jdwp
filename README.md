@@ -97,7 +97,7 @@ Supported features
     * [ ] Value
 * ThreadReference
     * [x] Name
-    * [ ] Suspend
+    * [x] Suspend
     * [ ] Resume
     * [ ] Status
     * [ ] ThreadGroup
