@@ -99,7 +99,7 @@ Supported features
     * [x] Name
     * [x] Suspend
     * [x] Resume
-    * [ ] Status
+    * [x] Status
     * [ ] ThreadGroup
     * [ ] Frames
     * [ ] FrameCount

@@ -601,10 +601,13 @@ client.__protocol= {
         },
         [jdwp.ThreadReference.Status]= {
             encode= function(self, data)
-                -- TODO
+                return self:_encode_threadID(data.thread)
             end,
             decode= function(self, response, bytes)
-                -- TODO
+                response.threadStatus= self:_parse_int(bytes)
+                response.suspendStatus= self:_parse_int(bytes)
+
+                return response
             end,
         },
         [jdwp.ThreadReference.ThreadGroup]= {
