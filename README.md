@@ -96,7 +96,7 @@ Supported features
 * StringReference
     * [ ] Value
 * ThreadReference
-    * [ ] Name
+    * [x] Name
     * [ ] Suspend
     * [ ] Resume
     * [ ] Status

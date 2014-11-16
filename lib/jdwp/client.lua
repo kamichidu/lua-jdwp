@@ -575,10 +575,12 @@ client.__protocol= {
     [jdwp.ThreadReference._]= {
         [jdwp.ThreadReference.Name]= {
             encode= function(self, data)
-                -- TODO
+                return self:_encode_threadID(data.thread)
             end,
             decode= function(self, response, bytes)
-                -- TODO
+                response.threadName= self:_parse_string(bytes)
+
+                return response
             end,
         },
         [jdwp.ThreadReference.Suspend]= {
