@@ -622,10 +622,28 @@ client.__protocol= {
         },
         [jdwp.ThreadReference.Frames]= {
             encode= function(self, data)
-                -- TODO
+                local outdata= {}
+                for _, v in ipairs(self:_encode_threadID(data.thread)) do
+                    table.insert(outdata, v)
+                end
+                for _, v in ipairs(self:_encode_int(data.startFrame)) do
+                    table.insert(outdata, v)
+                end
+                for _, v in ipairs(self:_encode_int(data.length)) do
+                    table.insert(outdata, v)
+                end
+                return outdata
             end,
             decode= function(self, response, bytes)
-                -- TODO
+                local nframes= self:_parse_int(bytes)
+                response.frames= {}
+                for _= 1, nframes do
+                    local frame= {}
+                    frame.frameID= self:_parse_frameID(bytes)
+                    frame.location= self:_parse_location(bytes)
+                    table.insert(response.frames, frame)
+                end
+                return response
             end,
         },
         [jdwp.ThreadReference.FrameCount]= {
@@ -981,7 +999,7 @@ function client:_parse_byte(data)
 end
 
 function client:_encode_boolean(data)
-    if data ~= 0 then
+    if data ~= 0 or (type(data) == 'boolean' and data) then
         return {0x01}
     else
         return {0x00}
@@ -1077,9 +1095,23 @@ function client:_parse_objectID(data)
 end
 
 function client:_encode_tagged_objectID(data)
+    assert(data and data.typeTag and data.objectID)
+
+    local bytes= {}
+    for _, v in ipairs(self:_encode_byte(data.typeTag)) do
+        table.insert(bytes, v)
+    end
+    for _, v in ipairs(self:_encode_objectID(data.objectID)) do
+        table.insert(bytes, v)
+    end
+    return bytes
 end
 
 function client:_parse_tagged_objectID(data)
+    return {
+        typeTag= self:_parse_byte(data),
+        objectID= self:_parse_objectID(data),
+    }
 end
 
 function client:_encode_threadID(data)
@@ -1163,27 +1195,89 @@ function client:_parse_arrayTypeID(data)
 end
 
 function client:_encode_methodID(data)
+    local nbytes= self.__idsizes.methodIDSize
+    local bitmask= 0xff
+    local bytes= {}
+    for ibytes= 1, nbytes do
+        local shiftbits= (nbytes - ibytes) * 8
+        table.insert(bytes, bitwise.rshift(bitwise.band(data, bitwise.lshift(bitmask, shiftbits)), shiftbits))
+    end
+    return bytes
 end
 
 function client:_parse_methodID(data)
+    local nbytes= self.__idsizes.methodIDSize
+    local value= 0
+    for ibytes= 1, nbytes do
+        local shiftbits= (nbytes - ibytes) * 8
+        value= bitwise.bor(value, bitwise.lshift(table.remove(data, 1), shiftbits))
+    end
+    return value
 end
 
 function client:_encode_fieldID(data)
+    local nbytes= self.__idsizes.fieldIDSize
+    local bitmask= 0xff
+    local bytes= {}
+    for ibytes= 1, nbytes do
+        local shiftbits= (nbytes - ibytes) * 8
+        table.insert(bytes, bitwise.rshift(bitwise.band(data, bitwise.lshift(bitmask, shiftbits)), shiftbits))
+    end
+    return bytes
 end
 
 function client:_parse_fieldID(data)
+    local nbytes= self.__idsizes.fieldIDSize
+    local value= 0
+    for ibytes= 1, nbytes do
+        local shiftbits= (nbytes - ibytes) * 8
+        value= bitwise.bor(value, bitwise.lshift(table.remove(data, 1), shiftbits))
+    end
+    return value
 end
 
 function client:_encode_frameID(data)
+    local nbytes= self.__idsizes.frameIDSize
+    local bitmask= 0xff
+    local bytes= {}
+    for ibytes= 1, nbytes do
+        local shiftbits= (nbytes - ibytes) * 8
+        table.insert(bytes, bitwise.rshift(bitwise.band(data, bitwise.lshift(bitmask, shiftbits)), shiftbits))
+    end
+    return bytes
 end
 
 function client:_parse_frameID(data)
+    local nbytes= self.__idsizes.frameIDSize
+    local value= 0
+    for ibytes= 1, nbytes do
+        local shiftbits= (nbytes - ibytes) * 8
+        value= bitwise.bor(value, bitwise.lshift(table.remove(data, 1), shiftbits))
+    end
+    return value
 end
 
 function client:_encode_location(data)
+    assert(data and data.typeTag and data.objectID and data.methodID and data.line)
+
+    local bytes= {}
+    for _, v in ipairs(self:_encode_tagged_objectID(data)) do
+        table.insert(bytes, v)
+    end
+    for _, v in ipairs(self:_encode_methodID(data.methodID)) do
+        table.insert(bytes, v)
+    end
+    for _, v in ipairs(self:_encode_long(data.line)) do
+        table.insert(bytes, v)
+    end
+    return bytes
 end
 
 function client:_parse_location(data)
+    local location= self:_parse_tagged_objectID(data)
+    location.methodID= self:_parse_methodID(data)
+    location.line= self:_parse_long(data)
+    return location
 end
 
 function client:_encode_string(data)

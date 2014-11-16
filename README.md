@@ -101,7 +101,7 @@ Supported features
     * [x] Resume
     * [x] Status
     * [x] ThreadGroup
-    * [ ] Frames
+    * [x] Frames
     * [ ] FrameCount
     * [ ] OwnedMonitors
     * [ ] CurrentContendedMonitor
