@@ -36,7 +36,7 @@ client.__protocol= {
             end,
             decode= function(self, response, bytes)
                 response.description= self:_parse_string(bytes)
-                response.jdwpMajour= self:_parse_int(bytes)
+                response.jdwpMajor= self:_parse_int(bytes)
                 response.jdwpMinor= self:_parse_int(bytes)
                 response.vmVersion= self:_parse_string(bytes)
                 response.vmName= self:_parse_string(bytes)
